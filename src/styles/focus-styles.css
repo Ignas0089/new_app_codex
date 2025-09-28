@@ -1,0 +1,37 @@
+:root {
+  --focus-ring-color: rgba(31, 122, 224, 0.4);
+  --focus-ring-color-strong: rgba(31, 122, 224, 0.75);
+  --focus-offset: 2px;
+  --focus-radius: 6px;
+}
+
+/* Base outline reset to avoid double rings */
+:focus {
+  outline: none;
+}
+
+[data-focus-visible-added],
+:focus-visible {
+  outline: 2px solid var(--focus-ring-color-strong);
+  outline-offset: var(--focus-offset);
+  border-radius: var(--focus-radius);
+  box-shadow: 0 0 0 4px var(--focus-ring-color);
+}
+
+.ds-button:focus-visible,
+.ds-tabs__trigger:focus-visible {
+  border-radius: 9999px;
+}
+
+.ds-card:focus-visible {
+  border-radius: 12px;
+}
+
+/* High contrast mode adjustment */
+@media (forced-colors: active) {
+  [data-focus-visible-added],
+  :focus-visible {
+    outline: 1px solid ButtonText;
+    box-shadow: none;
+  }
+}
