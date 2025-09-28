@@ -20,9 +20,9 @@ export interface ExpenseFilters {
 }
 
 function applyFilters(
-  collection: Collection<ExpenseRecord, string>,
+  collection: Collection<ExpenseRecord, unknown>,
   filters: ExpenseFilters
-): Collection<ExpenseRecord, string> {
+): Collection<ExpenseRecord, unknown> {
   let result = collection;
 
   if (filters.categoryId) {
@@ -44,7 +44,7 @@ export async function listExpenses(
   database: ExpenseDatabase = db
 ): Promise<Expense[]> {
   const order = filters.order ?? 'desc';
-  let collection: Collection<ExpenseRecord, string>;
+  let collection: Collection<ExpenseRecord, unknown>;
 
   if (filters.month) {
     collection = database.expenses.where('month').equals(filters.month);

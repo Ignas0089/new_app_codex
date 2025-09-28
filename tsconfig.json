@@ -8,6 +8,5 @@
     "allowSyntheticDefaultImports": true,
     "types": ["vite/client", "vitest"]
   },
-  "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": ["src"]
 }

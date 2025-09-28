@@ -1,4 +1,4 @@
-import type { ExpenseDatabase } from '@db/db';
+import type { ExpenseDatabase, SettingRecord } from '@db/db';
 import { db } from '@db/db';
 import { BackupSchema, BudgetSchema, CategorySchema, ExpenseSchema, SettingSchema } from '@domain/schemas';
 import type { BackupPayload } from '@domain/types';
@@ -84,7 +84,12 @@ export async function importBackup(
         await database.settings.clear();
       }
 
-      await database.settings.bulkPut(data.settings);
+      const settingRecords: SettingRecord[] = data.settings.map((setting) => ({
+        key: setting.key,
+        value: setting.value
+      }));
+
+      await database.settings.bulkPut(settingRecords);
     }
   );
 }
