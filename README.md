@@ -1,5 +1,7 @@
 # Expense Tracker (Desktop, EUR, English)
 
+[![CI][ci-badge]][ci-workflow]
+
 Manual expense logging with monthly category budgets and clear charts. Local-first (IndexedDB), no accounts.
 
 ## Features (MVP)
@@ -9,18 +11,27 @@ Manual expense logging with monthly category budgets and clear charts. Local-fir
 - Export/Import JSON backups
 
 ## Quick start
+
+### Using pnpm (recommended)
 1. Install dependencies: `pnpm install`
 2. Start development server: `pnpm dev`
 3. Visit http://localhost:5173
 
-> **Note:** Package downloads require internet access. In restricted environments run `pnpm install --offline` with a prepared store.
+### Using npm
+1. Install dependencies: `npm install`
+2. Start development server: `npm run dev`
+3. Visit http://localhost:5173
+
+> **Note:** Package downloads require internet access. In restricted environments use a local npm mirror or a pre-populated cache (`pnpm install --offline` or `npm install --prefer-offline`).
 
 ## Available scripts
-- `pnpm dev` — start Vite development server
-- `pnpm build` — type-check and create production build
-- `pnpm preview` — serve the production build locally
-- `pnpm lint` — run ESLint against TypeScript/React sources
-- `pnpm test` — execute unit tests with Vitest (to be added in later stages)
+- `pnpm dev` / `npm run dev` — start the Vite development server
+- `pnpm build` / `npm run build` — type-check and create the production build
+- `pnpm preview` / `npm run preview` — serve the production build locally
+- `pnpm lint` / `npm run lint` — run ESLint against TypeScript/React sources
+- `pnpm test` / `npm run test` — execute unit tests in watch mode with Vitest
+- `pnpm test:unit` / `npm run test:unit` — run the Vitest suite once with coverage enabled
+- `pnpm test:e2e` / `npm run test:e2e` — launch the Playwright test runner (requires a production build)
 
 ## Tech stack
 - React 18 + TypeScript
@@ -37,13 +48,16 @@ src/
   styles/         # Global design tokens and base theme
 ```
 
-Upcoming directories:
-- `src/db` for Dexie schema
+Additional directories of note:
+- `src/db` for the Dexie schema and database helpers
 - `src/services` for domain services
-- `src/utils` for formatting helpers
+- `src/utils` for shared utility functions and React hooks
 
 ## Contributing
 See `CONTRIBUTING.md`. Code of Conduct: `CODE_OF_CONDUCT.md`.
 
 ## License
 See `LICENSE`.
+
+[ci-badge]: https://github.com/your-org/simple-ledger/actions/workflows/ci.yml/badge.svg
+[ci-workflow]: https://github.com/your-org/simple-ledger/actions/workflows/ci.yml
