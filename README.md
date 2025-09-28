@@ -1,6 +1,6 @@
 # Expense Tracker (Desktop, EUR, English)
 
-[![CI](https://github.com/your-org/simple-ledger/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/simple-ledger/actions/workflows/ci.yml)
+[![CI][ci-badge]][ci-workflow]
 
 Manual expense logging with monthly category budgets and clear charts. Local-first (IndexedDB), no accounts.
 
@@ -11,20 +11,27 @@ Manual expense logging with monthly category budgets and clear charts. Local-fir
 - Export/Import JSON backups
 
 ## Quick start
+
+### Using pnpm (recommended)
+1. Install dependencies: `pnpm install`
+2. Start development server: `pnpm dev`
+3. Visit http://localhost:5173
+
+### Using npm
 1. Install dependencies: `npm install`
 2. Start development server: `npm run dev`
 3. Visit http://localhost:5173
 
-> **Note:** Package downloads require internet access. In restricted environments use a local npm mirror or pre-populated cache (`npm install --prefer-offline`).
+> **Note:** Package downloads require internet access. In restricted environments use a local npm mirror or a pre-populated cache (`pnpm install --offline` or `npm install --prefer-offline`).
 
 ## Available scripts
-- `npm run dev` — start the Vite development server
-- `npm run build` — type-check and create the production build
-- `npm run preview` — serve the production build locally
-- `npm run lint` — run ESLint against TypeScript/React sources
-- `npm run test` — execute unit tests in watch mode with Vitest
-- `npm run test:unit` — run the Vitest suite once with coverage enabled
-- `npm run test:e2e` — launch the Playwright test runner (requires a production build)
+- `pnpm dev` / `npm run dev` — start the Vite development server
+- `pnpm build` / `npm run build` — type-check and create the production build
+- `pnpm preview` / `npm run preview` — serve the production build locally
+- `pnpm lint` / `npm run lint` — run ESLint against TypeScript/React sources
+- `pnpm test` / `npm run test` — execute unit tests in watch mode with Vitest
+- `pnpm test:unit` / `npm run test:unit` — run the Vitest suite once with coverage enabled
+- `pnpm test:e2e` / `npm run test:e2e` — launch the Playwright test runner (requires a production build)
 
 ## Tech stack
 - React 18 + TypeScript
@@ -51,3 +58,6 @@ See `CONTRIBUTING.md`. Code of Conduct: `CODE_OF_CONDUCT.md`.
 
 ## License
 See `LICENSE`.
+
+[ci-badge]: https://github.com/your-org/simple-ledger/actions/workflows/ci.yml/badge.svg
+[ci-workflow]: https://github.com/your-org/simple-ledger/actions/workflows/ci.yml
