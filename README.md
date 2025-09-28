@@ -13,6 +13,14 @@ Manual expense logging with monthly category budgets and clear charts. Local-fir
 2. Start development server: `npm run dev`
 3. Visit http://localhost:5173
 
+### Running inside a sandbox
+
+When the development environment runs inside a sandbox or remote container, expose the Vite server so it can be reached from your host machine:
+
+1. Install dependencies: `npm install`
+2. Start the server with an explicit host (and optional custom port if required by your sandbox): `npm run dev -- --host 0.0.0.0 [--port 5173]`
+3. Open the forwarded URL from your browser (for example, `http://127.0.0.1:5173` if the sandbox forwards the default port).
+
 > **Note:** Package downloads require internet access. In restricted environments use a local npm mirror or a pre-populated cache (`npm install --prefer-offline`).
 
 ## Available scripts
