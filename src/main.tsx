@@ -1,16 +1,25 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { App } from '@app/App';
+import { seedDatabase } from '@db/seeds';
 import '@styles/theme.css';
 
-const rootElement = document.getElementById('root');
+async function bootstrap(): Promise<void> {
+  await seedDatabase();
 
-if (!rootElement) {
-  throw new Error('Root element not found');
+  const rootElement = document.getElementById('root');
+
+  if (!rootElement) {
+    throw new Error('Root element not found');
+  }
+
+  ReactDOM.createRoot(rootElement).render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  );
 }
 
-ReactDOM.createRoot(rootElement).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+void bootstrap().catch((error) => {
+  console.error('Failed to bootstrap application', error);
+});
