@@ -33,14 +33,18 @@ Manual expense logging with monthly category budgets and clear charts. Local-fir
 src/
   app/            # Application shell, navigation
   components/     # Shared UI primitives (Layout, TabNavigation)
-  pages/          # Feature pages: Log, Budgets, Reports, Settings
+  db/             # Dexie database configuration and seeds
+  domain/         # Zod schemas and domain helpers
+  pages/          # Feature surfaces: Log, Budgets, Reports, Settings
+  services/       # Data-access layer for expenses, budgets, categories, backups
   styles/         # Global design tokens and base theme
+  test/           # Vitest setup utilities
+  utils/          # Formatting helpers and shared hooks
 ```
 
-Upcoming directories:
-- `src/db` for Dexie schema
-- `src/services` for domain services
-- `src/utils` for formatting helpers
+## Current limitations
+- Tab content is placeholder-only; Stage 3 will add the real forms, tables, and dashboards referenced in each page description.
+- Automated tests are not yet implemented even though the tooling is scaffolded (`pnpm test` is reserved for future work).
 
 ## Contributing
 See `CONTRIBUTING.md`. Code of Conduct: `CODE_OF_CONDUCT.md`.
