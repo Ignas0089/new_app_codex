@@ -12,12 +12,18 @@ export default defineConfig({
       '@pages': '/src/pages',
       '@services': '/src/services',
       '@styles': '/src/styles',
-      '@utils': '/src/utils'
+      '@utils': '/src/utils',
+      '@test': '/src/test'
     }
   },
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
-    globals: true
+    globals: true,
+    reporters: process.env.CI ? ['default', 'junit'] : 'default',
+    coverage: {
+      reporter: ['text', 'lcov'],
+      include: ['src/services/**/*.ts', 'src/utils/**/*.ts']
+    }
   }
 });

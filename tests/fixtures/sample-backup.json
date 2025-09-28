@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "exportedAt": "2024-05-01T00:00:00.000Z",
+  "categories": [
+    {
+      "id": "cat-groceries",
+      "name": "Groceries",
+      "color": "#ff8800",
+      "isHidden": false,
+      "createdAt": "2024-03-01T00:00:00.000Z",
+      "updatedAt": "2024-04-01T00:00:00.000Z"
+    }
+  ],
+  "budgets": [
+    {
+      "id": "budget-2024-05-groceries",
+      "month": "2024-05",
+      "categoryId": "cat-groceries",
+      "limitCents": 30000,
+      "carryOverPrev": true,
+      "createdAt": "2024-04-25T00:00:00.000Z",
+      "updatedAt": "2024-04-25T00:00:00.000Z"
+    }
+  ],
+  "expenses": [
+    {
+      "id": "exp-1",
+      "amountCents": 1250,
+      "currency": "EUR",
+      "date": "2024-05-02T10:15:00.000Z",
+      "month": "2024-05",
+      "categoryId": "cat-groceries",
+      "note": "Vegetables",
+      "createdAt": "2024-05-02T10:15:00.000Z",
+      "updatedAt": "2024-05-02T10:15:00.000Z"
+    }
+  ],
+  "settings": [
+    { "key": "currency", "value": "EUR" }
+  ]
+}
