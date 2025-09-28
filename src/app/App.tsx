@@ -15,6 +15,46 @@ const tabs: Array<{ key: TabKey; label: string; description: string }> = [
   { key: 'settings', label: 'Settings', description: 'Manage categories, backups, and preferences.' }
 ];
 
+const heroContent: Record<
+  TabKey,
+  {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    helperLabel: string;
+    helperCopy: string;
+  }
+> = {
+  log: {
+    eyebrow: 'Stage 1 • Capture',
+    title: 'Log expenses',
+    subtitle: 'Capture spending without friction and stay focused on what’s left.',
+    helperLabel: 'Keyboard shortcut',
+    helperCopy: 'Paspausk N, kad greitai pradėtum naują išlaidos įrašą bet kurioje vietoje puslapyje.'
+  },
+  budgets: {
+    eyebrow: 'Stage 2 • Plan',
+    title: 'Monthly budgets',
+    subtitle: 'Adjust targets so you always know how your categories are pacing.',
+    helperLabel: 'Guided action',
+    helperCopy: 'Peržiūrėk likučius ir koreguok sumas, kad palaikytum ramų finansų tempą.'
+  },
+  reports: {
+    eyebrow: 'Stage 3 • Review',
+    title: 'Spending reports',
+    subtitle: 'Visualize spending patterns and celebrate the progress you’re making.',
+    helperLabel: 'Insight tip',
+    helperCopy: 'Ieškok tendencijų, kurios parodo kur sutaupai daugiau ir kur verta sugrįžti prie plano.'
+  },
+  settings: {
+    eyebrow: 'Stage 4 • Control',
+    title: 'Settings',
+    subtitle: 'Fine-tune preferences, backups, and data control without the stress.',
+    helperLabel: 'Best practice',
+    helperCopy: 'Prieš atlikdamas rizikingus veiksmus, eksportuok duomenis – taip užtikrinsi ramybę.'
+  }
+};
+
 const tabContent: Record<TabKey, JSX.Element> = {
   log: <LogPage />,
   budgets: <BudgetsPage />,
@@ -24,17 +64,29 @@ const tabContent: Record<TabKey, JSX.Element> = {
 
 export function App(): JSX.Element {
   const [activeTab, setActiveTab] = useState<TabKey>('log');
+  const { eyebrow, title, subtitle, helperLabel, helperCopy } = heroContent[activeTab];
 
   return (
     <Layout>
-      <header className="app-header">
-        <h1 className="app-title">Simple Ledger</h1>
-        <p className="app-subtitle">Expense tracking so simple you’ll actually use it.</p>
-      </header>
-      <TabNavigation tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
-      <section aria-live="polite" className="app-section">
-        {tabContent[activeTab]}
-      </section>
+      <div className="app-shell">
+        <header className="hero" role="banner">
+          <div className="hero__content">
+            <p className="hero__eyebrow">{eyebrow}</p>
+            <h1 className="hero__title">{title}</h1>
+            <p className="hero__subtitle">{subtitle}</p>
+          </div>
+          <div className="hero__aside" aria-live="polite">
+            <span className="hero__aside-label">{helperLabel}</span>
+            <p className="hero__aside-copy">{helperCopy}</p>
+          </div>
+        </header>
+
+        <TabNavigation tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
+
+        <section aria-live="polite" className="app-section" id={`panel-${activeTab}`} role="tabpanel" aria-labelledby={`tab-${activeTab}`}>
+          {tabContent[activeTab]}
+        </section>
+      </div>
     </Layout>
   );
 }
