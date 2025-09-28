@@ -24,7 +24,7 @@ Manual expense logging with monthly category budgets and clear charts. Local-fir
 
 ### Running inside a sandbox or remote container
 1. Install dependencies with your preferred package manager.
-2. Start the server with an explicit host (and optional custom port if required by your sandbox): `pnpm dev --host 0.0.0.0 [--port <port>]` or `npm run dev -- --host 0.0.0.0 --port <port>` (omit the port flag if the default 5173 works).
+2. Start the server with an explicit host (and optional custom port if required by your sandbox): `pnpm dev -- --host 0.0.0.0 [--port <port>]` or `npm run dev -- --host 0.0.0.0 [--port <port>]` (omit the port flag if the default 5173 works).
 3. Open the forwarded URL from your browser (for example, `http://127.0.0.1:5173` if the sandbox forwards the default port).
 
 > **Note:** Package downloads require internet access. In restricted environments use a local npm mirror or a pre-populated cache (`pnpm install --offline` or `npm install --prefer-offline`).
