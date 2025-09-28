@@ -64,7 +64,6 @@ Additional directories of note:
 
 ## Current limitations
 - Playwright scenarios are planned and documented but not yet automated end-to-end.
-- Some ESLint plugins are unsupported in restricted environments; see CI status for the latest lint outcome.
 
 ## Contributing
 See `CONTRIBUTING.md`. Code of Conduct: `CODE_OF_CONDUCT.md`.
