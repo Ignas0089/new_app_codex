@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { HTMLAttributes } from 'react';
 import { format } from 'date-fns';
 
 import { ConfirmDialog } from '@components/ConfirmDialog';
@@ -30,6 +31,60 @@ function buildInitialForm(categories: Category[]): ExpenseFormState {
   return { amount: '', date: today, categoryId: defaultCategory, note: '' };
 }
 
+const VIRTUALIZATION_THRESHOLD = 1000;
+const ESTIMATED_ROW_HEIGHT = 56;
+const TABLE_COLUMN_COUNT = 5;
+const OVERSCAN = 8;
+const DEFAULT_CONTAINER_HEIGHT = 480;
+
+interface VirtualState {
+  startIndex: number;
+  endIndex: number;
+  paddingTop: number;
+  paddingBottom: number;
+}
+
+interface ExpenseRowProps extends HTMLAttributes<HTMLTableRowElement> {
+  expense: Expense;
+  categoryName: string;
+  onEdit: (expense: Expense) => void;
+  onDelete: (expense: Expense) => void;
+}
+
+const ExpenseRow = forwardRef<HTMLTableRowElement, ExpenseRowProps>(function ExpenseRow(
+  { expense, categoryName, onEdit, onDelete, ...rest }: ExpenseRowProps,
+  ref
+) {
+  return (
+    <tr ref={ref} {...rest}>
+      <td>{format(new Date(expense.date), 'dd MMM yyyy')}</td>
+      <td>{categoryName}</td>
+      <td>
+        <Money amountCents={expense.amountCents} />
+      </td>
+      <td>{expense.note ?? '—'}</td>
+      <td className="table__actions">
+        <button
+          type="button"
+          className="link-button"
+          onClick={() => onEdit(expense)}
+          aria-label={`Edit expense from ${categoryName}`}
+        >
+          Edit
+        </button>
+        <button
+          type="button"
+          className="link-button link-button--danger"
+          onClick={() => onDelete(expense)}
+          aria-label={`Delete expense from ${categoryName}`}
+        >
+          Delete
+        </button>
+      </td>
+    </tr>
+  );
+});
+
 export function LogPage(): JSX.Element {
   const [month, setMonth] = useState<MonthKey>(getMonthKey(new Date()));
   const [categories, setCategories] = useState<Category[]>([]);
@@ -46,6 +101,7 @@ export function LogPage(): JSX.Element {
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const amountInputRef = useRef<HTMLInputElement>(null);
+  const tableContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let active = true;
@@ -109,9 +165,186 @@ export function LogPage(): JSX.Element {
     };
   }, []);
 
+  const categoryNameById = useMemo(() => {
+    return categories.reduce<Map<string, string>>((map, category) => {
+      map.set(category.id, category.name);
+      return map;
+    }, new Map());
+  }, [categories]);
+
+  const shouldVirtualize = expenses.length >= VIRTUALIZATION_THRESHOLD;
+  const rowHeightsRef = useRef<number[]>([]);
+  const [virtualState, setVirtualState] = useState<VirtualState>({
+    startIndex: 0,
+    endIndex: 0,
+    paddingTop: 0,
+    paddingBottom: 0
+  });
+
+  const ensureRowHeights = useCallback(() => {
+    if (!shouldVirtualize) {
+      rowHeightsRef.current = [];
+      return;
+    }
+    const current = rowHeightsRef.current;
+    if (current.length !== expenses.length) {
+      rowHeightsRef.current = expenses.map((_, index) => current[index] ?? ESTIMATED_ROW_HEIGHT);
+    }
+  }, [expenses, shouldVirtualize]);
+
+  const computeVirtualState = useCallback(
+    (scrollTop: number, containerHeight: number) => {
+      if (!shouldVirtualize) {
+        return {
+          startIndex: 0,
+          endIndex: expenses.length,
+          paddingTop: 0,
+          paddingBottom: 0
+        };
+      }
+
+      ensureRowHeights();
+
+      const heights = rowHeightsRef.current;
+      const effectiveHeight = containerHeight > 0 ? containerHeight : DEFAULT_CONTAINER_HEIGHT;
+
+      let totalHeight = 0;
+      for (const height of heights) {
+        totalHeight += height;
+      }
+
+      let startIndex = 0;
+      let top = 0;
+      while (startIndex < expenses.length && top + heights[startIndex] <= scrollTop) {
+        top += heights[startIndex];
+        startIndex += 1;
+      }
+
+      let endIndex = startIndex;
+      let coveredHeight = 0;
+      while (endIndex < expenses.length && coveredHeight < effectiveHeight) {
+        coveredHeight += heights[endIndex];
+        endIndex += 1;
+      }
+
+      startIndex = Math.max(0, startIndex - OVERSCAN);
+      endIndex = Math.min(expenses.length, endIndex + OVERSCAN);
+
+      let paddingTop = 0;
+      for (let index = 0; index < startIndex; index += 1) {
+        paddingTop += heights[index];
+      }
+
+      let renderedHeight = 0;
+      for (let index = startIndex; index < endIndex; index += 1) {
+        renderedHeight += heights[index];
+      }
+
+      const paddingBottom = Math.max(totalHeight - paddingTop - renderedHeight, 0);
+
+      return {
+        startIndex,
+        endIndex,
+        paddingTop,
+        paddingBottom
+      };
+    },
+    [ensureRowHeights, expenses, shouldVirtualize]
+  );
+
+  useEffect(() => {
+    if (!shouldVirtualize) {
+      rowHeightsRef.current = [];
+      setVirtualState({
+        startIndex: 0,
+        endIndex: expenses.length,
+        paddingTop: 0,
+        paddingBottom: 0
+      });
+      return;
+    }
+
+    const container = tableContainerRef.current;
+    const containerHeight = container?.clientHeight ?? DEFAULT_CONTAINER_HEIGHT;
+    const scrollTop = container?.scrollTop ?? 0;
+    setVirtualState(computeVirtualState(scrollTop, containerHeight));
+  }, [computeVirtualState, expenses, shouldVirtualize]);
+
+  useEffect(() => {
+    if (!shouldVirtualize) {
+      return;
+    }
+
+    const container = tableContainerRef.current;
+    if (!container) {
+      return;
+    }
+
+    const handleScroll = () => {
+      setVirtualState(computeVirtualState(container.scrollTop, container.clientHeight ?? DEFAULT_CONTAINER_HEIGHT));
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+    };
+  }, [computeVirtualState, shouldVirtualize]);
+
+  useEffect(() => {
+    if (!shouldVirtualize) {
+      return;
+    }
+
+    const handleResize = () => {
+      const container = tableContainerRef.current;
+      if (!container) {
+        return;
+      }
+      setVirtualState(computeVirtualState(container.scrollTop, container.clientHeight ?? DEFAULT_CONTAINER_HEIGHT));
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [computeVirtualState, shouldVirtualize]);
+
+  const registerRowMeasurement = useCallback(
+    (index: number, element: HTMLTableRowElement | null) => {
+      if (!element) {
+        return;
+      }
+
+      const measuredHeight = element.getBoundingClientRect().height || ESTIMATED_ROW_HEIGHT;
+      if (!Number.isFinite(measuredHeight)) {
+        return;
+      }
+
+      if (rowHeightsRef.current.length <= index) {
+        rowHeightsRef.current[index] = ESTIMATED_ROW_HEIGHT;
+      }
+
+      const storedHeight = rowHeightsRef.current[index];
+      if (Math.abs(storedHeight - measuredHeight) > 0.5) {
+        rowHeightsRef.current[index] = measuredHeight;
+        if (shouldVirtualize) {
+          const container = tableContainerRef.current;
+          const containerHeight = container?.clientHeight ?? DEFAULT_CONTAINER_HEIGHT;
+          const scrollTop = container?.scrollTop ?? 0;
+          setVirtualState(computeVirtualState(scrollTop, containerHeight));
+        }
+      }
+    },
+    [computeVirtualState, shouldVirtualize]
+  );
+
   const totalForMonth = useMemo(() => {
     return expenses.reduce((sum, expense) => sum + expense.amountCents, 0);
   }, [expenses]);
+
+  const visibleVirtualizedExpenses = shouldVirtualize
+    ? expenses.slice(virtualState.startIndex, virtualState.endIndex)
+    : [];
 
   const handleFormChange: React.ChangeEventHandler<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement> = (
     event
@@ -406,7 +639,12 @@ export function LogPage(): JSX.Element {
           ) : expenses.length === 0 ? (
             <p className="card__empty">No expenses yet. Log your first one to see your month take shape.</p>
           ) : (
-            <div className="table-wrapper" role="region" aria-live="polite">
+            <div
+              ref={tableContainerRef}
+              className={`table-wrapper${shouldVirtualize ? ' table-wrapper--virtualized' : ''}`}
+              role="region"
+              aria-live="polite"
+            >
               <table className="table">
                 <thead>
                   <tr>
@@ -417,39 +655,69 @@ export function LogPage(): JSX.Element {
                     <th scope="col" className="table__actions">Actions</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {expenses.map((expense) => {
-                    const categoryName = categories.find((category) => category.id === expense.categoryId)?.name ??
-                      'Unknown';
-                    return (
-                      <tr key={expense.id}>
-                        <td>{format(new Date(expense.date), 'dd MMM yyyy')}</td>
-                        <td>{categoryName}</td>
-                        <td>
-                          <Money amountCents={expense.amountCents} />
-                        </td>
-                        <td>{expense.note ?? '—'}</td>
-                        <td className="table__actions">
-                          <button
-                            type="button"
-                            className="link-button"
-                            onClick={() => handleEdit(expense)}
-                            aria-label={`Edit expense from ${categoryName}`}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            className="link-button link-button--danger"
-                            onClick={() => handleDelete(expense)}
-                            aria-label={`Delete expense from ${categoryName}`}
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                <tbody data-testid="expenses-body" data-virtualized={shouldVirtualize}>
+                  {shouldVirtualize ? (
+                    <>
+                      {virtualState.paddingTop > 0 ? (
+                        <tr
+                          className="table__spacer-row"
+                          aria-hidden="true"
+                          role="presentation"
+                          key="virtual-padding-top"
+                          style={{ height: `${virtualState.paddingTop}px` }}
+                        >
+                          <td className="table__spacer-cell" colSpan={TABLE_COLUMN_COUNT} />
+                        </tr>
+                      ) : null}
+                      {visibleVirtualizedExpenses.map((expense, offset) => {
+                        const index = virtualState.startIndex + offset;
+                        const categoryName = categoryNameById.get(expense.categoryId) ?? 'Unknown';
+                        const rowClassName = index % 2 === 1 ? 'table__row--striped' : undefined;
+
+                        return (
+                          <ExpenseRow
+                            key={expense.id}
+                            ref={(element) => registerRowMeasurement(index, element)}
+                            expense={expense}
+                            categoryName={categoryName}
+                            onEdit={handleEdit}
+                            onDelete={handleDelete}
+                            className={rowClassName}
+                            data-index={index}
+                            data-testid="expense-row"
+                          />
+                        );
+                      })}
+                      {virtualState.paddingBottom > 0 ? (
+                        <tr
+                          className="table__spacer-row"
+                          aria-hidden="true"
+                          role="presentation"
+                          key="virtual-padding-bottom"
+                          style={{ height: `${virtualState.paddingBottom}px` }}
+                        >
+                          <td className="table__spacer-cell" colSpan={TABLE_COLUMN_COUNT} />
+                        </tr>
+                      ) : null}
+                    </>
+                  ) : (
+                    expenses.map((expense, index) => {
+                      const categoryName = categoryNameById.get(expense.categoryId) ?? 'Unknown';
+                      const rowClassName = index % 2 === 1 ? 'table__row--striped' : undefined;
+
+                      return (
+                        <ExpenseRow
+                          key={expense.id}
+                          expense={expense}
+                          categoryName={categoryName}
+                          onEdit={handleEdit}
+                          onDelete={handleDelete}
+                          className={rowClassName}
+                          data-testid="expense-row"
+                        />
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>
