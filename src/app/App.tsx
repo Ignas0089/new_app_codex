@@ -65,6 +65,9 @@ const tabContent: Record<TabKey, JSX.Element> = {
 export function App(): JSX.Element {
   const [activeTab, setActiveTab] = useState<TabKey>('log');
   const { eyebrow, title, subtitle, helperLabel, helperCopy } = heroContent[activeTab];
+  const handleTabChange = (tab: TabKey) => {
+    setActiveTab(tab);
+  };
 
   return (
     <Layout>
@@ -81,7 +84,7 @@ export function App(): JSX.Element {
           </div>
         </header>
 
-        <TabNavigation tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
+        <TabNavigation tabs={tabs} activeTab={activeTab} onChange={handleTabChange} />
 
         <section aria-live="polite" className="app-section" id={`panel-${activeTab}`} role="tabpanel" aria-labelledby={`tab-${activeTab}`}>
           {tabContent[activeTab]}
