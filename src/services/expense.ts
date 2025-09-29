@@ -1,4 +1,4 @@
-import type { Collection } from 'dexie';
+import type { Collection, IndexableType } from 'dexie';
 
 import type { ExpenseRecord, ExpenseDatabase } from '@db/db';
 import { db } from '@db/db';
@@ -20,9 +20,9 @@ export interface ExpenseFilters {
 }
 
 function applyFilters(
-  collection: Collection<ExpenseRecord, string>,
+  collection: Collection<ExpenseRecord, IndexableType>,
   filters: ExpenseFilters
-): Collection<ExpenseRecord, string> {
+): Collection<ExpenseRecord, IndexableType> {
   let result = collection;
 
   if (filters.categoryId) {
@@ -44,7 +44,7 @@ export async function listExpenses(
   database: ExpenseDatabase = db
 ): Promise<Expense[]> {
   const order = filters.order ?? 'desc';
-  let collection: Collection<ExpenseRecord, string>;
+  let collection: Collection<ExpenseRecord, IndexableType>;
 
   if (filters.month) {
     collection = database.expenses.where('month').equals(filters.month);

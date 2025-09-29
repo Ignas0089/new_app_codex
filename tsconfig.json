@@ -1,13 +1,9 @@
 {
-  "extends": "./tsconfig.node.json",
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "jsx": "react-jsx",
-    "module": "esnext",
     "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
+    "jsx": "react-jsx",
     "types": ["vite/client", "vitest"]
   },
-  "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": ["src", "src/vite-env.d.ts"]
 }

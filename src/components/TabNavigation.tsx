@@ -1,22 +1,22 @@
-import type { FunctionComponent } from 'react';
+import type { JSX } from 'react';
 
-export interface TabConfig {
-  key: string;
+export interface TabConfig<TKey extends string = string> {
+  key: TKey;
   label: string;
   description?: string;
 }
 
-interface TabNavigationProps {
-  tabs: TabConfig[];
-  activeTab: string;
-  onChange: (tab: TabConfig['key']) => void;
+interface TabNavigationProps<TKey extends string = string> {
+  tabs: TabConfig<TKey>[];
+  activeTab: TKey;
+  onChange: (tab: TKey) => void;
 }
 
-export const TabNavigation: FunctionComponent<TabNavigationProps> = ({
+export function TabNavigation<TKey extends string = string>({
   tabs,
   activeTab,
   onChange
-}) => {
+}: TabNavigationProps<TKey>): JSX.Element {
   return (
     <nav className="tab-navigation" aria-label="Primary">
       <ul className="tab-navigation__list" role="tablist">
@@ -44,4 +44,4 @@ export const TabNavigation: FunctionComponent<TabNavigationProps> = ({
       </ul>
     </nav>
   );
-};
+}
