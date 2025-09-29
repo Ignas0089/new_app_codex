@@ -564,6 +564,11 @@ body {
   overflow-x: auto;
 }
 
+.table-wrapper--virtualized {
+  max-height: 480px;
+  overflow-y: auto;
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -586,6 +591,15 @@ body {
 
 .table tbody tr:nth-child(even) {
   background-color: #f9fafb;
+}
+
+.table__row--striped {
+  background-color: #f9fafb;
+}
+
+.table__spacer-row td {
+  padding: 0;
+  border-bottom: none;
 }
 
 .table__actions {
