@@ -144,6 +144,25 @@ export function ReportsPage(): JSX.Element {
     return map;
   }, [categories]);
 
+  const summary = useMemo(() => {
+    const totalBudgetCents = budgetRows.reduce(
+      (sum, row) => sum + row.limitCents + row.carryInCents,
+      0
+    );
+    const totalActualCents = budgetRows.reduce((sum, row) => sum + row.actualCents, 0);
+    const availableCents = totalBudgetCents - totalActualCents;
+    const utilization = totalBudgetCents > 0 ? totalActualCents / totalBudgetCents : null;
+    const leadCategory = categorySpend[0];
+
+    return {
+      totalBudgetCents,
+      totalActualCents,
+      availableCents,
+      utilization,
+      leadCategory
+    };
+  }, [budgetRows, categorySpend]);
+
   const budgetVsActualConfig = useMemo<ChartUnionConfig | null>(() => {
     if (budgetRows.length === 0) {
       return null;
@@ -281,6 +300,11 @@ export function ReportsPage(): JSX.Element {
   const previousTrend = trend[trend.length - 2];
   const monthDifference = currentTrend && previousTrend ? currentTrend.totalCents - previousTrend.totalCents : null;
   const overBudget = budgetRows.find((row) => row.status === 'over');
+  const hasReportData = budgetRows.length > 0 || categorySpend.length > 0 || trend.length > 0;
+
+  const handleRetry = useCallback(() => {
+    void loadData();
+  }, [loadData]);
 
   return (
     <article id="panel-reports" role="tabpanel" aria-labelledby="tab-reports" className="page">
@@ -309,6 +333,44 @@ export function ReportsPage(): JSX.Element {
           </div>
         </div>
 
+        {summary.utilization !== null || summary.leadCategory ? (
+          <section className="reports-summary" aria-label="Month summary">
+            <div className="reports-summary__metric">
+              <span className="reports-summary__label">Budgeted</span>
+              <Money amountCents={summary.totalBudgetCents} />
+            </div>
+            <div className="reports-summary__metric">
+              <span className="reports-summary__label">Spent</span>
+              <Money
+                amountCents={summary.totalActualCents}
+                tone={summary.utilization !== null && summary.utilization <= 1 ? 'default' : 'danger'}
+              />
+            </div>
+            <div className="reports-summary__metric">
+              <span className="reports-summary__label">Remaining</span>
+              <Money
+                amountCents={summary.availableCents}
+                tone={summary.availableCents >= 0 ? 'positive' : 'danger'}
+              />
+            </div>
+            {summary.utilization !== null ? (
+              <div className="reports-summary__metric">
+                <span className="reports-summary__label">Utilization</span>
+                <span className="reports-summary__value">{Math.round(summary.utilization * 100)}%</span>
+              </div>
+            ) : null}
+            {summary.leadCategory ? (
+              <div className="reports-summary__metric reports-summary__metric--highlight">
+                <span className="reports-summary__label">Top category</span>
+                <span className="reports-summary__value">
+                  {categoryLookup.get(summary.leadCategory.categoryId)?.name ?? 'Unknown'}
+                </span>
+                <Money amountCents={summary.leadCategory.totalCents} />
+              </div>
+            ) : null}
+          </section>
+        ) : null}
+
         {overBudget ? (
           <div className="alert alert--warning" role="status">
             You’re over by{' '}
@@ -321,29 +383,38 @@ export function ReportsPage(): JSX.Element {
         ) : null}
 
         {error ? (
-          <p className="card__empty" role="alert">
-            {error}
-          </p>
+          <div className="card__empty" role="alert">
+            <p>{error}</p>
+            <button type="button" className="button" onClick={handleRetry}>
+              Try again
+            </button>
+          </div>
         ) : isLoading ? (
           <p className="card__empty">Loading reports…</p>
         ) : (
-          <div className="reports-grid">
-            <ChartCard
-              title="Budget vs actual"
-              description="Spot where you’re pacing ahead or need to adjust."
-              configuration={budgetVsActualConfig}
-            />
-            <ChartCard
-              title="Category breakdown"
-              description="See which categories shape your month."
-              configuration={categoryBreakdownConfig}
-            />
-            <ChartCard
-              title="Trends"
-              description="Track spending momentum over the last 12 months."
-              configuration={trendConfig}
-            />
-          </div>
+          hasReportData ? (
+            <div className="reports-grid">
+              <ChartCard
+                title="Budget vs actual"
+                description="Spot where you’re pacing ahead or need to adjust."
+                configuration={budgetVsActualConfig}
+              />
+              <ChartCard
+                title="Category breakdown"
+                description="See which categories shape your month."
+                configuration={categoryBreakdownConfig}
+              />
+              <ChartCard
+                title="Trends"
+                description="Track spending momentum over the last 12 months."
+                configuration={trendConfig}
+              />
+            </div>
+          ) : (
+            <p className="card__empty">
+              Add at least one budget and expense to see how your month is shaping up.
+            </p>
+          )
         )}
       </div>
     </article>
