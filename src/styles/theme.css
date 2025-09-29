@@ -749,6 +749,42 @@ body {
   gap: 16px;
 }
 
+.reports-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(219, 234, 254, 0.5), rgba(236, 254, 255, 0.5));
+}
+
+.reports-summary__metric {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.reports-summary__metric--highlight {
+  background: rgba(15, 118, 110, 0.08);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.reports-summary__label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #475569;
+}
+
+.reports-summary__value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
 .chart {
   min-height: 240px;
 }

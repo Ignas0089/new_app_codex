@@ -65,6 +65,18 @@ describe('calculateBudgetSnapshot', () => {
     expect(snapshot.status).toBe('ok');
   });
 
+  it('uses the base limit to signal approaching when carry-over increases the ceiling', () => {
+    const snapshot = calculateBudgetSnapshot({
+      budget: { ...baseBudget, carryOverPrev: true },
+      actualCents: 43000,
+      previousBudget,
+      previousActualCents: 25000
+    });
+
+    expect(snapshot.carryInCents).toBe(35000);
+    expect(snapshot.status).toBe('approaching');
+  });
+
   it('ignores carry-over when previous budget is missing', () => {
     const snapshot = calculateBudgetSnapshot({
       budget: { ...baseBudget, carryOverPrev: true },

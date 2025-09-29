@@ -28,15 +28,31 @@ function computeCarryInCents({
   return Math.max(leftover, 0);
 }
 
-function resolveStatus(limitCents: number, actualCents: number, approachingRatio: number): BudgetSnapshot['status'] {
-  if (limitCents === 0) {
+function resolveStatus({
+  baseLimit,
+  effectiveLimit,
+  actualCents,
+  approachingRatio
+}: {
+  baseLimit: number;
+  effectiveLimit: number;
+  actualCents: number;
+  approachingRatio: number;
+}): BudgetSnapshot['status'] {
+  if (effectiveLimit === 0) {
     return actualCents > 0 ? 'over' : 'ok';
   }
 
-  const ratio = actualCents / limitCents;
-  if (ratio >= 1) {
+  if (actualCents >= effectiveLimit) {
     return 'over';
   }
+
+  const comparisonLimit = baseLimit > 0 ? baseLimit : effectiveLimit;
+  if (comparisonLimit === 0) {
+    return 'ok';
+  }
+
+  const ratio = actualCents / comparisonLimit;
   if (ratio >= approachingRatio) {
     return 'approaching';
   }
@@ -56,6 +72,11 @@ export function calculateBudgetSnapshot(context: BudgetComputationContext): Budg
     actualCents,
     carryInCents,
     availableCents,
-    status: resolveStatus(effectiveLimit, actualCents, approachingRatio)
+    status: resolveStatus({
+      baseLimit: budget.limitCents,
+      effectiveLimit,
+      actualCents,
+      approachingRatio
+    })
   };
 }
