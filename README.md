@@ -1,5 +1,7 @@
 # Expense Tracker (Desktop, EUR, English)
 
+[![CI](https://github.com/your-org/simple-ledger/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/simple-ledger/actions/workflows/ci.yml)
+
 Manual expense logging with monthly category budgets and clear charts. Local-first (IndexedDB), no accounts.
 
 ## Features (MVP)
@@ -30,6 +32,10 @@ When the development environment runs inside a sandbox or remote container, expo
 - `npm run lint` — run ESLint against TypeScript/React sources
 - `npm run test` — execute unit tests in watch mode with Vitest
 
+## Continuous integration
+
+The GitHub Actions workflow defined in `.github/workflows/ci.yml` installs dependencies with `pnpm`, runs the lint checks, and executes the Vitest suite (`pnpm test --runInBand`) for every push and pull request targeting `main`.
+
 ## Tech stack
 - React 18 + TypeScript
 - Vite 5 build tooling
@@ -57,7 +63,6 @@ Additional directories of note:
 
 ## Current limitations
 - Tab content is placeholder-only; Stage 3 will add the real forms, tables, and dashboards referenced in each page description.
-- Automated tests are not yet implemented even though the tooling is scaffolded (`npm run test` is reserved for future work).
 
 ## Contributing
 See `CONTRIBUTING.md`. Code of Conduct: `CODE_OF_CONDUCT.md`.

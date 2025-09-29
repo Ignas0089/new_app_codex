@@ -1,1 +1,1 @@
-// Test setup placeholder – extend with shared mocks when needed.
+import '@testing-library/jest-dom/vitest';
